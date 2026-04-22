@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Rotativa.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
 //
 // ===================== SERVICES =====================
@@ -18,7 +19,7 @@ builder.Services.AddRazorPages();
 
 // Database (SQLite)
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlite("Data Source=HospitalDB.db"));
+    options.UseSqlite("Data Source=/tmp/HospitalDB.db"));
 
 // Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
@@ -31,7 +32,7 @@ builder.Services.AddTransient<IEmailSender, EmailSender>();
 var app = builder.Build();
 
 var env = app.Services.GetRequiredService<IWebHostEnvironment>();
-
+// Rotativa disabled for Cloud Run testing
 RotativaConfiguration.Setup(env.WebRootPath, "Rotativa");
 Rotativa.AspNetCore.RotativaConfiguration.Setup(app.Environment.WebRootPath, "Rotativa");
 
