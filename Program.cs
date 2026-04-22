@@ -7,13 +7,15 @@ using Microsoft.EntityFrameworkCore;
 using Rotativa.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Cloud Run Port
 builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
 //
 // ===================== SERVICES =====================
 //
 
-// MVC + Razor Pages (Identity needs Razor Pages)
+// MVC + Razor Pages
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
@@ -26,15 +28,19 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders();
 
-// Email sender (required for Identity UI)
+// Email Sender
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
 var app = builder.Build();
 
-var env = app.Services.GetRequiredService<IWebHostEnvironment>();
-// Rotativa disabled for Cloud Run testing
-RotativaConfiguration.Setup(env.WebRootPath, "Rotativa");
-Rotativa.AspNetCore.RotativaConfiguration.Setup(app.Environment.WebRootPath, "Rotativa");
+//
+// ===================== ROTATIVA =====================
+// Disabled for Cloud Run testing
+//
+
+// var env = app.Services.GetRequiredService<IWebHostEnvironment>();
+// RotativaConfiguration.Setup(env.WebRootPath, "Rotativa");
+// Rotativa.AspNetCore.RotativaConfiguration.Setup(app.Environment.WebRootPath, "Rotativa");
 
 //
 // ===================== SEED DATA =====================
@@ -42,41 +48,47 @@ Rotativa.AspNetCore.RotativaConfiguration.Setup(app.Environment.WebRootPath, "Ro
 
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-
-    // Role Manager
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-
-    string[] roles = { "Admin", "Doctor", "Patient" };
-
-    foreach (var role in roles)
+    try
     {
-        if (!await roleManager.RoleExistsAsync(role))
+        var services = scope.ServiceProvider;
+
+        var db = services.GetRequiredService<ApplicationDbContext>();
+        db.Database.Migrate();
+
+        var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+        var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
+
+        string[] roles = { "Admin", "Doctor", "Patient" };
+
+        foreach (var role in roles)
         {
-            await roleManager.CreateAsync(new IdentityRole(role));
+            if (!await roleManager.RoleExistsAsync(role))
+            {
+                await roleManager.CreateAsync(new IdentityRole(role));
+            }
+        }
+
+        var adminEmail = "admin@hospital.com";
+        var adminPassword = "Admin@123";
+
+        var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+        if (adminUser == null)
+        {
+            adminUser = new ApplicationUser
+            {
+                UserName = adminEmail,
+                Email = adminEmail,
+                EmailConfirmed = true
+            };
+
+            await userManager.CreateAsync(adminUser, adminPassword);
+            await userManager.AddToRoleAsync(adminUser, "Admin");
         }
     }
-
-    // User Manager
-    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-
-    // Create Admin User
-    var adminEmail = "admin@hospital.com";
-    var adminPassword = "Admin@123";
-
-    var adminUser = await userManager.FindByEmailAsync(adminEmail);
-
-    if (adminUser == null)
+    catch (Exception ex)
     {
-        adminUser = new ApplicationUser
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-            EmailConfirmed = true
-        };
-
-        await userManager.CreateAsync(adminUser, adminPassword);
-        await userManager.AddToRoleAsync(adminUser, "Admin");
+        Console.WriteLine(ex.Message);
     }
 }
 
