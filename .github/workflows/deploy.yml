@@ -1,4 +1,4 @@
-name: Build and Deploy to GCP
+name: Build and Deploy to GCP with Manager Approval
 
 on:
   push:
@@ -7,12 +7,18 @@ on:
     branches: [main]
 
 jobs:
-  deploy:
+
+  build:
     runs-on: ubuntu-latest
+
+    outputs:
+      image: us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hospital-repo/hospital-app:latest
 
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 2
 
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
@@ -27,6 +33,37 @@ jobs:
 
     - name: Publish
       run: dotnet publish -c Release -o publish
+
+    - name: Generate Change Report
+      run: |
+        git diff HEAD~1 HEAD --name-only > files.txt
+
+        echo "<html><body style='font-family:Arial;background:#f4f6f8;padding:20px;'>" > report.html
+        echo "<div style='max-width:800px;margin:auto;background:white;border-radius:12px;padding:20px;box-shadow:0 4px 12px rgba(0,0,0,0.1);'>" >> report.html
+        echo "<h2 style='color:#0d6efd;'>Code Changes Awaiting Approval</h2>" >> report.html
+        echo "<table style='width:100%;border-collapse:collapse;'>" >> report.html
+        echo "<tr style='background:#0d6efd;color:white;'><th style='padding:10px;'>Changed Files</th></tr>" >> report.html
+
+        while read line; do
+          echo "<tr><td style='padding:10px;border-bottom:1px solid #ddd;'>$line</td></tr>" >> report.html
+        done < files.txt
+
+        echo "</table>" >> report.html
+        echo "<p style='margin-top:20px;color:#555;'>Please review and approve deployment in GitHub Actions Environment.</p>" >> report.html
+        echo "</div></body></html>" >> report.html
+
+    - name: Send Approval Email to Manager
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 465
+        secure: true
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: Approval Required - Hospital App Deployment
+        to: ${{ secrets.MANAGER_EMAIL }}
+        from: DevOps Pipeline
+        html_body: file://report.html
 
     - name: Authenticate GCP
       uses: google-github-actions/auth@v2
@@ -47,6 +84,29 @@ jobs:
       run: |
         docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hospital-repo/hospital-app:latest
 
+  approval:
+    runs-on: ubuntu-latest
+    needs: build
+    environment:
+      name: production
+
+    steps:
+    - name: Waiting for Manager Approval
+      run: echo "Waiting for manager approval in GitHub Environment"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: approval
+
+    steps:
+    - name: Authenticate GCP
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+    - name: Setup Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
+
     - name: Deploy Cloud Run
       run: |
         gcloud run deploy hospital-app \
@@ -56,3 +116,34 @@ jobs:
         --allow-unauthenticated \
         --port 8080 \
         --timeout 300
+
+    - name: Send Success Email to Manager
+      uses: dawidd6/action-send-mail@v3
+      with:
+        server_address: smtp.gmail.com
+        server_port: 465
+        secure: true
+        username: ${{ secrets.EMAIL_USERNAME }}
+        password: ${{ secrets.EMAIL_PASSWORD }}
+        subject: Deployment Successful - Hospital App
+        to: ${{ secrets.MANAGER_EMAIL }}
+        from: DevOps Pipeline
+        html_body: |
+          <html>
+          <body style="font-family:Arial;background:#f4f6f8;padding:20px;">
+            <div style="max-width:700px;margin:auto;background:white;border-radius:12px;padding:25px;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+              <h2 style="color:#198754;">Deployment Successful</h2>
+              <table style="width:100%;border-collapse:collapse;">
+                <tr style="background:#198754;color:white;">
+                  <th style="padding:10px;">Application</th>
+                  <th style="padding:10px;">Status</th>
+                </tr>
+                <tr>
+                  <td style="padding:10px;border-bottom:1px solid #ddd;">Hospital App</td>
+                  <td style="padding:10px;border-bottom:1px solid #ddd;">Successfully Deployed</td>
+                </tr>
+              </table>
+              <p style="margin-top:20px;color:#555;">Cloud Run deployment completed successfully.</p>
+            </div>
+          </body>
+          </html>
