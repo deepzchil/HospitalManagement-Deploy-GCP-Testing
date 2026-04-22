@@ -1,0 +1,30 @@
+<h2>Admin Dashboard</h2>
+<p>Full system control panel</p>
+
+<a href="/Reports"
+   class="btn btn-dark m-2">
+    Reports
+</a>
+
+<a href="/Reports" class="btn btn-dark m-2">
+    Reports
+</a>
+
+<h3 class="mt-4">Recent Appointments</h3>
+
+<table class="table table-bordered mt-2">
+    <tr>
+        <th>Patient</th>
+        <th>Doctor</th>
+        <th>Date</th>
+    </tr>
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>@item.PatientName</td>
+            <td>@item.DoctorName</td>
+            <td>@item.AppointmentDate</td>
+        </tr>
+    }
+</table>

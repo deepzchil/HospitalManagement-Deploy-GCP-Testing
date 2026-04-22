@@ -1,0 +1,52 @@
+<h1 class="text-primary">📊 Hospital Reports Dashboard</h1>
+
+<div class="row mt-4">
+
+<div class="col-md-3">
+<div class="card shadow p-3 text-center">
+<h3>🧑 Patients</h3>
+<h2>@ViewBag.PatientCount</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card shadow p-3 text-center">
+<h3>👨‍⚕️ Doctors</h3>
+<h2>@ViewBag.DoctorCount</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card shadow p-3 text-center">
+<h3>📅 Today Appointments</h3>
+<h2>@ViewBag.AppointmentCount</h2>
+</div>
+</div>
+
+<div class="col-md-3">
+<div class="card shadow p-3 text-center">
+<h3>💰 Revenue</h3>
+<h2>₹@ViewBag.TotalBills</h2>
+</div>
+</div>
+
+</div>
+
+<hr />
+
+<canvas id="revenueChart" height="100"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+new Chart(document.getElementById('revenueChart'), {
+type: 'bar',
+data: {
+labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+datasets: [{
+label: 'Monthly Revenue',
+data: [12000,18000,15000,22000,27000,30000]
+}]
+}
+});
+</script>

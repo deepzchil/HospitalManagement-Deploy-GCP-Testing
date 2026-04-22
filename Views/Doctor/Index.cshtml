@@ -1,0 +1,44 @@
+@model List<HospitalManagementSystem.Models.Appointment>
+
+<h2>Doctor Dashboard</h2>
+
+<div class="mt-3">
+
+    <a href="/Prescription"
+       class="btn btn-warning m-2">
+        Prescription
+    </a>
+
+</div>
+
+<div class="card p-3">
+    <h3>Doctor Panel</h3>
+
+    <a href="/Prescription" class="btn btn-warning m-2">
+        🧾 Manage Prescriptions
+    </a>
+
+    <a href="/Appointment" class="btn btn-primary m-2">
+        📅 View Appointments
+    </a>
+    <a href="/Prescription" class="btn btn-warning m-2">
+    Prescription
+    </a>
+</div>
+
+<table class="table table-bordered">
+    <tr>
+        <th>Patient Name</th>
+        <th>Time Slot</th>
+        <th>Status</th>
+    </tr>
+
+@foreach (var item in Model)
+{
+    <tr>
+        <td>@item.PatientName</td>
+        <td>@item.TimeSlot</td>
+        <td>@item.Status</td>
+    </tr>
+}
+</table>

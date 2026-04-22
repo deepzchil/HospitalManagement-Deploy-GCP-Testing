@@ -1,0 +1,71 @@
+@model HospitalManagementSystem.Models.Prescription
+
+<h2 class="text-primary">🩺 Create Prescription</h2>
+
+<hr />
+
+<form asp-action="Create" method="post">
+
+    @Html.AntiForgeryToken()
+
+    <div asp-validation-summary="All" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label>Patient Name</label>
+        <input asp-for="PatientName" class="form-control" />
+        <span asp-validation-for="PatientName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Doctor Name</label>
+        <input asp-for="DoctorName" class="form-control" />
+        <span asp-validation-for="DoctorName" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Diagnosis</label>
+        <textarea asp-for="Diagnosis" class="form-control"></textarea>
+        <span asp-validation-for="Diagnosis" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Medicines</label>
+        <textarea asp-for="Medicines" class="form-control"
+                  placeholder="Paracetamol, Amoxicillin"></textarea>
+        <span asp-validation-for="Medicines" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Dosage</label>
+        <textarea asp-for="Dosage" class="form-control"
+                  placeholder="1 tablet after food, twice daily"></textarea>
+        <span asp-validation-for="Dosage" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Notes</label>
+        <textarea asp-for="Notes" class="form-control"></textarea>
+        <span asp-validation-for="Notes" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label>Follow Up Date</label>
+        <input asp-for="FollowUpDate" type="date" class="form-control" />
+        <span asp-validation-for="FollowUpDate" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">
+        Save Prescription
+    </button>
+
+    <a asp-action="Index" class="btn btn-secondary">
+        Cancel
+    </a>
+
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
