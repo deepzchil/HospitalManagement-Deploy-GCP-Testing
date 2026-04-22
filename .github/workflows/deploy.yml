@@ -1,13 +1,13 @@
-name: CI-CD Deploy to GCP
+name: Build and Deploy to GCP
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main]
   pull_request:
-    branches: [ "main" ]
+    branches: [main]
 
 jobs:
-  build-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +19,7 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
-    - name: Restore dependencies
+    - name: Restore
       run: dotnet restore
 
     - name: Build
@@ -28,27 +28,31 @@ jobs:
     - name: Publish
       run: dotnet publish -c Release -o publish
 
-    - name: Auth GCP
+    - name: Authenticate GCP
       uses: google-github-actions/auth@v2
       with:
         credentials_json: ${{ secrets.GCP_SA_KEY }}
 
-    - name: Configure Docker for Artifact Registry
-      run: |
-        gcloud auth configure-docker ${{ secrets.GCP_REGION }}-docker.pkg.dev
+    - name: Setup Cloud SDK
+      uses: google-github-actions/setup-gcloud@v2
 
-    - name: Build Docker Image
-      run: |
-        docker build -t ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hospital-repo/hospital-app:latest .
+    - name: Configure Docker
+      run: gcloud auth configure-docker us-central1-docker.pkg.dev
 
-    - name: Push Docker Image
+    - name: Build Docker
       run: |
-        docker push ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hospital-repo/hospital-app:latest
+        docker build -t us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hospital-repo/hospital-app:latest .
 
-    - name: Deploy to Cloud Run
+    - name: Push Docker
+      run: |
+        docker push us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hospital-repo/hospital-app:latest
+
+    - name: Deploy Cloud Run
       run: |
         gcloud run deploy hospital-app \
-          --image ${{ secrets.GCP_REGION }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hospital-repo/hospital-app:latest \
-          --region ${{ secrets.GCP_REGION }} \
-          --platform managed \
-          --allow-unauthenticated
+        --image us-central1-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/hospital-repo/hospital-app:latest \
+        --region us-central1 \
+        --platform managed \
+        --allow-unauthenticated \
+        --port 8080 \
+        --timeout 300
