@@ -161,6 +161,9 @@ jobs:
     needs: approval
     runs-on: ubuntu-latest
 
+    outputs:
+      app_url: ${{ steps.url.outputs.app_url }}
+
     environment:
       name: production
 
@@ -170,6 +173,12 @@ jobs:
         with:
           name: website-package
           path: publish
+
+      - name: Set Application URL
+        id: url
+        run: |
+          APP_URL="https://${{ env.AZURE_WEBAPP_NAME }}.azurewebsites.net"
+          echo "app_url=$APP_URL" >> $GITHUB_OUTPUT
 
       - name: Azure Login
         uses: azure/login@v2
@@ -224,6 +233,16 @@ jobs:
                 <tr><td><b>Executed By</b></td><td>${{ github.actor }}</td></tr>
                 <tr><td><b>Commit ID</b></td><td>${{ github.sha }}</td></tr>
                 <tr><td><b>Commit Message</b></td><td>${{ needs.build.outputs.commit_message }}</td></tr>
+
+                <tr>
+                  <td><b>Application URL</b></td>
+                  <td>
+                    <a href="${{ needs.deploy.outputs.app_url }}" target="_blank">
+                      ${{ needs.deploy.outputs.app_url }}
+                    </a>
+                  </td>
+                </tr>
+
               </table>
 
               <br>

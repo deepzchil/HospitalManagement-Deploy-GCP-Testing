@@ -1,7 +1,11 @@
-name: CI/CD Pipeline with Change Report + Manager Approval
+name: CI/CD Pipeline with Change Report + Manager Approval (Google Cloud)
 
 on:
   push:
+    branches:
+      - main
+
+  pull_request:
     branches:
       - main
 
@@ -175,6 +179,9 @@ jobs:
     needs: approval
     runs-on: ubuntu-latest
 
+    outputs:
+      service_url: ${{ steps.url.outputs.service_url }}
+
     environment:
       name: production
 
@@ -196,6 +203,15 @@ jobs:
           --allow-unauthenticated \
           --port 8080 \
           --timeout 300
+
+      - name: Get Service URL
+        id: url
+        run: |
+          SERVICE_URL=$(gcloud run services describe ${{ env.SERVICE_NAME }} \
+            --region ${{ env.REGION }} \
+            --format='value(status.url)')
+
+          echo "service_url=$SERVICE_URL" >> $GITHUB_OUTPUT
 
 # -------------------------------------------------
 # JOB 5 - SUCCESS EMAIL
@@ -240,6 +256,16 @@ jobs:
                 <tr><td><b>Executed By</b></td><td>${{ github.actor }}</td></tr>
                 <tr><td><b>Commit ID</b></td><td>${{ github.sha }}</td></tr>
                 <tr><td><b>Commit Message</b></td><td>${{ needs.build.outputs.commit_message }}</td></tr>
+
+                <tr>
+                  <td><b>Application URL</b></td>
+                  <td>
+                    <a href="${{ needs.deploy.outputs.service_url }}" target="_blank">
+                      ${{ needs.deploy.outputs.service_url }}
+                    </a>
+                  </td>
+                </tr>
+
               </table>
 
               <br>
