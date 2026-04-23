@@ -302,3 +302,4 @@ D:\Sample for testing projects\HospitalManagementSystem\bin\Debug\net8.0\ExcelNu
 D:\Sample for testing projects\HospitalManagementSystem\bin\Debug\net8.0\RBush.dll
 D:\Sample for testing projects\HospitalManagementSystem\bin\Debug\net8.0\SixLabors.Fonts.dll
 D:\Sample for testing projects\HospitalManagementSystem\bin\Debug\net8.0\System.IO.Packaging.dll
+D:\Sample for testing projects\HospitalManagementSystem\obj\Debug\net8.0\HospitalManagementSystem.sourcelink.json

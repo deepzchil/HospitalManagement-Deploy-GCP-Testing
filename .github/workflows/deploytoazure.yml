@@ -97,7 +97,7 @@ jobs:
           secure: false
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: Production Deployment Approval Required | ${{ github.repository }}
+          subject: Production Deployment Approval Required for Azure | ${{ github.repository }}
           to: ${{ env.MANAGER_EMAIL }}
           from: ${{ secrets.EMAIL_USERNAME }}
           html_body: |
@@ -210,7 +210,7 @@ jobs:
           secure: false
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
-          subject: Production Deployment Successful | ${{ github.repository }}
+          subject: Production Deployment Successful for Azure | ${{ github.repository }}
           to: ${{ env.MANAGER_EMAIL }}
           from: ${{ secrets.EMAIL_USERNAME }}
           html_body: |
