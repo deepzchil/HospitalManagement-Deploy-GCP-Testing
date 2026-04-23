@@ -8,7 +8,7 @@ using Rotativa.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Cloud Run Port
+// Cloud Run Port on 8080
 builder.WebHost.UseUrls("http://0.0.0.0:8080");
 
 //
