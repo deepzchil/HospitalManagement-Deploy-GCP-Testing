@@ -138,16 +138,13 @@ jobs:
           html_body: |
             <html>
             <body style="font-family:Arial,Helvetica,sans-serif;color:#333;line-height:1.6;">
-
               <h2 style="color:#0d6efd;">Dear ${{ env.MANAGER_NAME }},</h2>
-
               <p>
                 Latest build for <b>${{ github.repository }}</b> completed successfully
                 and is ready for production approval.
               </p>
 
               <h3 style="color:#0d6efd;">Deployment Summary</h3>
-
               <table border="1" cellpadding="8" cellspacing="0" style="border-collapse:collapse;width:100%;">
                 <tr><td><b>Repository</b></td><td>${{ github.repository }}</td></tr>
                 <tr><td><b>Branch</b></td><td>${{ github.ref_name }}</td></tr>
@@ -295,8 +292,14 @@ jobs:
 
               <br>
 
-              <h3 style="color:#198754;">Released Changes</h3>
-              <pre style="background:#f8f9fa;padding:14px;border:1px solid #ddd;border-radius:6px;">${{ needs.build.outputs.changed_files }}</pre>
+              <h3 style="color:#0d6efd;">Files Changed</h3>
+              <pre style="background:#f4f4f4;padding:12px;border:1px solid #ddd;">${{ needs.build.outputs.changed_files }}</pre>
+
+              <h3 style="color:#0d6efd;">Change Statistics</h3>
+              <pre style="background:#f8f9fa;padding:12px;border:1px solid #ddd;">${{ needs.build.outputs.change_stats }}</pre>
+
+              <h3 style="color:#0d6efd;">Code Changes Preview</h3>
+              <pre style="background:#f8f9fa;padding:12px;border:1px solid #ddd;white-space:pre-wrap;">${{ needs.build.outputs.code_changes }}</pre>
 
               <p>
                 Production environment is now live and updated successfully.
