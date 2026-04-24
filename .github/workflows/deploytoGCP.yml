@@ -12,6 +12,7 @@ env:
   PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
   REGION: us-central1
   SERVICE_NAME: hospital-app
+  DOTNET_VERSION: 8.0.x
   MANAGER_EMAIL: ${{ vars.MANAGER_EMAIL }}
   MANAGER_NAME: ${{ vars.MANAGER_NAME }}
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
@@ -82,16 +83,16 @@ jobs:
       - name: Setup .NET
         uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: ${{ env.DOTNET_VERSION }}
 
       - name: Restore
-        run: dotnet restore ./HospitalManagementSystem/HospitalManagementSystem.csproj
+        run: dotnet restore
 
       - name: Build
-        run: dotnet build ./HospitalManagementSystem/HospitalManagementSystem.csproj --configuration Release --no-restore
+        run: dotnet build --configuration Release --no-restore
 
       - name: Publish
-        run: dotnet publish ./HospitalManagementSystem/HospitalManagementSystem.csproj --configuration Release --no-build -o publish
+        run: dotnet publish --configuration Release --no-build -o publish
 
       - name: Authenticate to GCP
         uses: google-github-actions/auth@v3
