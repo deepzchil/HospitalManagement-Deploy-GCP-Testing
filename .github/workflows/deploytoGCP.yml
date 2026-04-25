@@ -264,7 +264,7 @@ jobs:
 
               <h2 style="color:#198754;">Deployment Successful</h2>
 
-              <p>Dear <b>${{ env.MANAGER_NAME }}</b>,</p>
+              <h2 style="color:#0d6efd;">Dear ${{ env.MANAGER_NAME }},</h2>
 
               <p>
                 Approved deployment for <b>${{ github.repository }}</b>
